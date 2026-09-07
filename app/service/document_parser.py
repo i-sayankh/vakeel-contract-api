@@ -17,7 +17,11 @@ def extract_text_from_pdf(file_path: str) -> str:
     for page in reader.pages:
         text += page.extract_text() + "\n"
 
-    return {"text": text.strip()}
+    return {
+        "text": text.strip(),
+        "page_count": len(reader.pages),
+        "word_count": len(text.split()),
+    }
 
 
 def extract_text_from_txt(file_path: str) -> str:
@@ -30,7 +34,13 @@ def extract_text_from_txt(file_path: str) -> str:
         str: _description_
     """
     with open(file_path, "r", encoding="utf-8") as f:
-        return f.read()
+        text = f.read()
+
+    return {
+        "text": text.strip(),
+        "page_count": 1,
+        "word_count": len(text.split()),
+    }
 
 
 def extract_text(file_path: str) -> str:

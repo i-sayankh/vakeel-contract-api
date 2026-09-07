@@ -3,6 +3,8 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from config import ALLOWED_EXTENSIONS, MAX_FILE_SIZE_MB, UPLOAD_DIRECTORY
 from service.document_parser import extract_text
+from models import Contract
+from database import contracts_collection
 
 contracts_router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
@@ -38,4 +40,28 @@ async def upload_contract(
 
     parsed = extract_text(file_path)
 
-    return {"filename": file.filename}
+    contract_data = Contract(
+        filename=unique_name,
+        original_name=file.filename,
+        text_content=parsed["text"] if isinstance(parsed, dict) else parsed,
+        page_count=(
+            int(parsed["page_count"])
+            if isinstance(parsed, dict)
+            else len(parsed.splitlines())
+        ),
+        word_count=(
+            int(parsed["word_count"])
+            if isinstance(parsed, dict)
+            else len(parsed.split())
+        ),
+    )
+
+    doc = contract_data.model_dump()
+    result = contracts_collection.insert_one(doc)
+    contract_data.id = str(result.inserted_id)
+
+    return {
+        "message": "File uploaded and parsed successfully",
+        "contract": contract_data.model_dump(),
+        "id": contract_data.id,
+    }
