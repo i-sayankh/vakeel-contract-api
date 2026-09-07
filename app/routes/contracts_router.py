@@ -59,9 +59,39 @@ async def upload_contract(
     doc = contract_data.model_dump()
     result = contracts_collection.insert_one(doc)
     contract_data.id = str(result.inserted_id)
+    contracts_collection.update_one(
+        {"_id": result.inserted_id}, {"$set": {"id": contract_data.id}}
+    )
 
     return {
         "message": "File uploaded and parsed successfully",
         "contract": contract_data.model_dump(),
         "id": contract_data.id,
     }
+
+
+@contracts_router.get("/")
+async def list_contracts():
+    """List all uploaded contracts."""
+
+    contracts = []
+    for doc in contracts_collection.find({}, {"text_content": 0}):
+        contract = Contract(**doc)
+        contract.id = str(doc["id"])
+        contracts.append(contract.model_dump())
+
+    return {"contracts": contracts}
+
+
+@contracts_router.get("/{contract_id}")
+async def get_contract(contract_id: str):
+    """Retrieve details of a specific contract by ID."""
+
+    doc = contracts_collection.find_one({"id": contract_id}, {"text_content": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    contract = Contract(**doc)
+    contract.id = str(doc["id"])
+
+    return {"contract": contract.model_dump()}

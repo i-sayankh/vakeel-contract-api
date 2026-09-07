@@ -53,7 +53,7 @@ def extract_text(file_path: str) -> str:
         str: _description_
     """
 
-    ext = os.path.splitext(file_path.filename)[1].lower()
+    ext = os.path.splitext(file_path)[1].lower()
 
     if ext == ".pdf":
         return extract_text_from_pdf(file_path)
