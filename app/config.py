@@ -4,4 +4,7 @@ import os
 load_dotenv()
 
 MONGODB_URI = os.getenv("MONGODB_URI")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+ALLOWED_EXTENSIONS = [".pdf", ".txt"]
+MAX_FILE_SIZE_MB = 5
+UPLOAD_DIRECTORY = "uploads"
