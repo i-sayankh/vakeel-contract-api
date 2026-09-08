@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from database import init_db
 from routes.contracts_router import contracts_router
+from routes.analysis_router import analysis_router
 
 app = FastAPI(
     title="Vakeel Contracts API",
@@ -31,3 +32,4 @@ async def root():
 
 
 app.include_router(contracts_router)
+app.include_router(analysis_router)
